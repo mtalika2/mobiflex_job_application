@@ -1,0 +1,238 @@
+{
+  "project_info": {
+    "project_number": "472111824768",
+    "project_id": "mobiflex-african",
+    "storage_bucket": "mobiflex-african.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:472111824768:android:351454d4c4c15f561e0b65",
+        "android_client_info": {
+          "package_name": "com.example.mobiflex_african"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAxiw9Mo_dUDZGgwhnVUW1brff_qO-3vHM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:472111824768:android:adb61c5609b1edc11e0b65",
+        "android_client_info": {
+          "package_name": "com.example.mobiflex_agent"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAxiw9Mo_dUDZGgwhnVUW1brff_qO-3vHM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:472111824768:android:5a3a51a78beca93d1e0b65",
+        "android_client_info": {
+          "package_name": "com.example.mobiflex_android_agent"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAxiw9Mo_dUDZGgwhnVUW1brff_qO-3vHM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:472111824768:android:51b82e8a07dae4931e0b65",
+        "android_client_info": {
+          "package_name": "com.example.mobiflex_customer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAxiw9Mo_dUDZGgwhnVUW1brff_qO-3vHM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:472111824768:android:404d0e3a143221731e0b65",
+        "android_client_info": {
+          "package_name": "com.example.mobiflex_customer_service"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAxiw9Mo_dUDZGgwhnVUW1brff_qO-3vHM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:472111824768:android:e723d9c22d65ede41e0b65",
+        "android_client_info": {
+          "package_name": "com.example.mobiflex_device_management"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAxiw9Mo_dUDZGgwhnVUW1brff_qO-3vHM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:472111824768:android:cd2c6dcdf41f39761e0b65",
+        "android_client_info": {
+          "package_name": "com.example.mobiflex_job_application"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAxiw9Mo_dUDZGgwhnVUW1brff_qO-3vHM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:472111824768:android:6b523b6b2eb9566b1e0b65",
+        "android_client_info": {
+          "package_name": "com.example.mobiflex_manager"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAxiw9Mo_dUDZGgwhnVUW1brff_qO-3vHM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:472111824768:android:57f34c098a77883b1e0b65",
+        "android_client_info": {
+          "package_name": "com.example.mobiflex_merchant"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAxiw9Mo_dUDZGgwhnVUW1brff_qO-3vHM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:472111824768:android:cb97784ab0d174271e0b65",
+        "android_client_info": {
+          "package_name": "com.example.mobiflex_shareholder"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAxiw9Mo_dUDZGgwhnVUW1brff_qO-3vHM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:472111824768:android:633d6620f7864bda1e0b65",
+        "android_client_info": {
+          "package_name": "com.example.mobiflex_sr"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAxiw9Mo_dUDZGgwhnVUW1brff_qO-3vHM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:472111824768:android:65d846f571115bfd1e0b65",
+        "android_client_info": {
+          "package_name": "com.example.mobiflex_super_admin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAxiw9Mo_dUDZGgwhnVUW1brff_qO-3vHM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

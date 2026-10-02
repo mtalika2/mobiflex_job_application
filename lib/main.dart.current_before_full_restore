@@ -1,0 +1,852 @@
+﻿import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+
+import 'firebase_options.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  runApp(const MobiFlexJobApplication());
+}
+
+class MobiFlexJobApplication extends StatelessWidget {
+  const MobiFlexJobApplication({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'MobiFlex African',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.blue,
+        ),
+        useMaterial3: true,
+      ),
+      home: const ApplicantLoginPage(),
+    );
+  }
+}
+
+class ApplicantLoginPage extends StatefulWidget {
+  const ApplicantLoginPage({super.key});
+
+  @override
+  State<ApplicantLoginPage> createState() => _ApplicantLoginPageState();
+}
+
+class _ApplicantLoginPageState extends State<ApplicantLoginPage> {
+  bool _isSigningIn = false;
+
+  Future<void> _signInWithGoogle() async {
+    if (_isSigningIn) {
+      return;
+    }
+
+    setState(() {
+      _isSigningIn = true;
+    });
+
+    try {
+      if (kIsWeb) {
+        final GoogleAuthProvider provider = GoogleAuthProvider();
+
+        await FirebaseAuth.instance.signInWithPopup(provider);
+      } else {
+        final GoogleSignInAccount googleUser =
+            await GoogleSignIn.instance.authenticate();
+
+        final GoogleSignInAuthentication googleAuth =
+            googleUser.authentication;
+
+        final AuthCredential credential =
+            GoogleAuthProvider.credential(
+          idToken: googleAuth.idToken,
+        );
+
+        await FirebaseAuth.instance.signInWithCredential(
+          credential,
+        );
+      }
+
+      if (!mounted) {
+        return;
+      }
+
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => const JobApplicationPage(),
+        ),
+      );
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e.message ?? 'Google sign-in failed. Please try again.',
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Google sign-in failed: $e',
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSigningIn = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: 500,
+            ),
+            child: Card(
+              elevation: 4,
+              child: Padding(
+                padding: const EdgeInsets.all(28),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.work_outline,
+                      size: 64,
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'MobiFlex African',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Online Job Application',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Apply for Manager, Agent, or Sales Representative (SR).',
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 28),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: ElevatedButton.icon(
+                        onPressed:
+                            _isSigningIn ? null : _signInWithGoogle,
+                        icon: _isSigningIn
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(Icons.login),
+                        label: Text(
+                          _isSigningIn
+                              ? 'Signing in...'
+                              : 'Continue with Google',
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Your Google account is used to securely identify '
+                      'your job application.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class JobApplicationPage extends StatefulWidget {
+  const JobApplicationPage({super.key});
+
+  @override
+  State<JobApplicationPage> createState() => _JobApplicationPageState();
+}
+
+class _JobApplicationPageState extends State<JobApplicationPage> {
+  final _formKey = GlobalKey<FormState>();
+
+  final _firstNameController = TextEditingController();
+  final _middleNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _nationalIdController = TextEditingController();
+  final _dateOfBirthController = TextEditingController();
+  final _addressController = TextEditingController();
+  final _cityController = TextEditingController();
+  final _countryController = TextEditingController();
+  final _schoolController = TextEditingController();
+  final _fieldOfStudyController = TextEditingController();
+  final _graduationYearController = TextEditingController();
+  final _experienceController = TextEditingController();
+
+  String? _selectedPosition;
+  String? _selectedQualification;
+  String? _selectedGender;
+
+  bool _agreedToTerms = false;
+  bool _isSubmitting = false;
+
+  User? get _currentUser => FirebaseAuth.instance.currentUser;
+
+  @override
+  void dispose() {
+    _firstNameController.dispose();
+    _middleNameController.dispose();
+    _lastNameController.dispose();
+    _phoneController.dispose();
+    _nationalIdController.dispose();
+    _dateOfBirthController.dispose();
+    _addressController.dispose();
+    _cityController.dispose();
+    _countryController.dispose();
+    _schoolController.dispose();
+    _fieldOfStudyController.dispose();
+    _graduationYearController.dispose();
+    _experienceController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _selectDateOfBirth() async {
+    final DateTime? selectedDate = await showDatePicker(
+      context: context,
+      firstDate: DateTime(1940),
+      lastDate: DateTime.now(),
+      initialDate: DateTime(2000),
+    );
+
+    if (selectedDate == null) {
+      return;
+    }
+
+    final String month =
+        selectedDate.month.toString().padLeft(2, '0');
+    final String day =
+        selectedDate.day.toString().padLeft(2, '0');
+
+    _dateOfBirthController.text =
+        '${selectedDate.year}-$month-$day';
+  }
+
+  Future<void> _submitApplication() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    if (_selectedPosition == null) {
+      _showMessage('Please select the position you are applying for.');
+      return;
+    }
+
+    if (_selectedQualification == null) {
+      _showMessage('Please select your highest qualification.');
+      return;
+    }
+
+    if (!_agreedToTerms) {
+      _showMessage(
+        'Please accept the Agreement & Consent before submitting.',
+      );
+      return;
+    }
+
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    try {
+      await Future<void>.delayed(
+        const Duration(milliseconds: 700),
+      );
+
+      if (!mounted) {
+        return;
+      }
+
+      await showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Application Ready'),
+            content: const Text(
+              'Your application information has passed the '
+              'initial validation. Firebase submission will be '
+              'connected in the next step.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
+    }
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+      ),
+    );
+  }
+
+  Future<void> _signOut() async {
+    if (!kIsWeb) {
+      await GoogleSignIn.instance.signOut();
+    }
+
+    await FirebaseAuth.instance.signOut();
+
+    if (!mounted) {
+      return;
+    }
+
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (_) => const ApplicantLoginPage(),
+      ),
+    );
+  }
+
+  Widget _sectionTitle(
+    String title,
+    String subtitle,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.only(
+        top: 24,
+        bottom: 16,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            subtitle,
+            style: const TextStyle(
+              color: Colors.grey,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _textField(
+    TextEditingController controller,
+    String label, {
+    TextInputType keyboardType = TextInputType.text,
+    bool required = true,
+    int maxLines = 1,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: TextFormField(
+        controller: controller,
+        keyboardType: keyboardType,
+        maxLines: maxLines,
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+        ),
+        validator: required
+            ? (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return '$label is required';
+                }
+                return null;
+              }
+            : null,
+      ),
+    );
+  }
+
+  Widget _documentUploadCard(
+    String title,
+    String description,
+    IconData icon,
+  ) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: ListTile(
+        leading: Icon(icon),
+        title: Text(
+          title,
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        subtitle: Text(description),
+        trailing: OutlinedButton(
+          onPressed: () {
+            _showMessage(
+              '$title upload will be connected to secure Firebase Storage.',
+            );
+          },
+          child: const Text('Upload'),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final User? user = _currentUser;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('MobiFlex Job Application'),
+        actions: [
+          IconButton(
+            tooltip: 'Sign out',
+            onPressed: _signOut,
+            icon: const Icon(Icons.logout),
+          ),
+        ],
+      ),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: 800,
+            ),
+            child: Card(
+              elevation: 3,
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Online Job Application',
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        user?.email ?? '',
+                        style: const TextStyle(
+                          color: Colors.grey,
+                        ),
+                      ),
+
+                      _sectionTitle(
+                        '1. Position',
+                        'Select the position you want to apply for.',
+                      ),
+
+                      DropdownButtonFormField<String>(
+                        initialValue: _selectedPosition,
+                        decoration: const InputDecoration(
+                          labelText: 'Position',
+                          border: OutlineInputBorder(),
+                        ),
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'Manager',
+                            child: Text('Manager'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Agent',
+                            child: Text('Agent'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Sales Representative (SR)',
+                            child: Text(
+                              'Sales Representative (SR)',
+                            ),
+                          ),
+                        ],
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedPosition = value;
+                          });
+                        },
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Position is required';
+                          }
+                          return null;
+                        },
+                      ),
+
+                      _sectionTitle(
+                        '2. Highest Qualification',
+                        'Select your highest completed qualification.',
+                      ),
+
+                      DropdownButtonFormField<String>(
+                        initialValue: _selectedQualification,
+                        decoration: const InputDecoration(
+                          labelText: 'Highest Qualification',
+                          border: OutlineInputBorder(),
+                        ),
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'Certificate',
+                            child: Text('Certificate'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Diploma',
+                            child: Text('Diploma'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Degree',
+                            child: Text('Degree'),
+                          ),
+                        ],
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedQualification = value;
+                          });
+                        },
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Qualification is required';
+                          }
+                          return null;
+                        },
+                      ),
+
+                      _sectionTitle(
+                        '3. Personal Details',
+                        'Provide your official personal information.',
+                      ),
+
+                      _textField(
+                        _firstNameController,
+                        'First Name',
+                      ),
+                      _textField(
+                        _middleNameController,
+                        'Middle Name',
+                        required: false,
+                      ),
+                      _textField(
+                        _lastNameController,
+                        'Last Name',
+                      ),
+                      _textField(
+                        _phoneController,
+                        'Phone Number',
+                        keyboardType: TextInputType.phone,
+                      ),
+                      _textField(
+                        _nationalIdController,
+                        'National ID Number',
+                      ),
+
+                      TextFormField(
+                        controller: _dateOfBirthController,
+                        readOnly: true,
+                        decoration: const InputDecoration(
+                          labelText: 'Date of Birth',
+                          border: OutlineInputBorder(),
+                          suffixIcon: Icon(
+                            Icons.calendar_today,
+                          ),
+                        ),
+                        onTap: _selectDateOfBirth,
+                        validator: (value) {
+                          if (value == null ||
+                              value.trim().isEmpty) {
+                            return 'Date of Birth is required';
+                          }
+                          return null;
+                        },
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      DropdownButtonFormField<String>(
+                        initialValue: _selectedGender,
+                        decoration: const InputDecoration(
+                          labelText: 'Gender',
+                          border: OutlineInputBorder(),
+                        ),
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'Male',
+                            child: Text('Male'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Female',
+                            child: Text('Female'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Other',
+                            child: Text('Other'),
+                          ),
+                        ],
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedGender = value;
+                          });
+                        },
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Gender is required';
+                          }
+                          return null;
+                        },
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      _textField(
+                        _addressController,
+                        'Residential Address',
+                        maxLines: 2,
+                      ),
+                      _textField(
+                        _cityController,
+                        'City / District',
+                      ),
+                      _textField(
+                        _countryController,
+                        'Country',
+                      ),
+
+                      _sectionTitle(
+                        '4. Education',
+                        'Provide details of your highest qualification.',
+                      ),
+
+                      _textField(
+                        _schoolController,
+                        'Institution / School',
+                      ),
+                      _textField(
+                        _fieldOfStudyController,
+                        'Field of Study',
+                      ),
+                      _textField(
+                        _graduationYearController,
+                        'Graduation Year',
+                        keyboardType: TextInputType.number,
+                      ),
+
+                      _sectionTitle(
+                        '5. Work Experience',
+                        'Tell us about your relevant work experience.',
+                      ),
+
+                      _textField(
+                        _experienceController,
+                        'Work Experience',
+                        required: false,
+                        maxLines: 6,
+                      ),
+
+                      _sectionTitle(
+                        '6. Required Documents',
+                        'Documents will be stored securely and accessed '
+                        'only by authorized recruitment staff.',
+                      ),
+
+                      _documentUploadCard(
+                        'CV / Resume',
+                        'Upload your current CV or resume.',
+                        Icons.description_outlined,
+                      ),
+                      _documentUploadCard(
+                        'Qualification Certificate',
+                        'Certificate, Diploma, or Degree document.',
+                        Icons.school_outlined,
+                      ),
+                      _documentUploadCard(
+                        'National ID',
+                        'Clear copy/photo of your National ID.',
+                        Icons.badge_outlined,
+                      ),
+                      _documentUploadCard(
+                        'Applicant Photo',
+                        'Recent passport-style photo.',
+                        Icons.photo_camera_outlined,
+                      ),
+
+                      _sectionTitle(
+                        '7. Agreement & Consent',
+                        'Please read and accept before submitting.',
+                      ),
+
+                      Card(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest,
+                        child: const Padding(
+                          padding: EdgeInsets.all(16),
+                          child: Text(
+                            'I confirm that the information and documents '
+                            'provided in this application are correct and '
+                            'genuine. I understand that MobiFlex African '
+                            'may verify the information and documents for '
+                            'recruitment purposes. I consent to the lawful '
+                            'collection, review, storage, and processing of '
+                            'my personal information for recruitment and '
+                            'employment purposes. I understand that submitting '
+                            'an application does not guarantee employment.',
+                          ),
+                        ),
+                      ),
+
+                      CheckboxListTile(
+                        contentPadding: EdgeInsets.zero,
+                        value: _agreedToTerms,
+                        onChanged: (value) {
+                          setState(() {
+                            _agreedToTerms = value ?? false;
+                          });
+                        },
+                        title: const Text(
+                          'I have read and agree to the Agreement & Consent.',
+                        ),
+                        controlAffinity:
+                            ListTileControlAffinity.leading,
+                      ),
+
+                      _sectionTitle(
+                        '8. Security',
+                        'Your Google account identifies your application. '
+                        'Your Google password is never stored by MobiFlex.',
+                      ),
+
+                      const Card(
+                        child: ListTile(
+                          leading: Icon(Icons.security),
+                          title: Text(
+                            'Secure Applicant Identity',
+                          ),
+                          subtitle: Text(
+                            'Your application is linked to your '
+                            'authenticated Google account. Employment '
+                            'permissions are created separately only after '
+                            'approval.',
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 28),
+
+                      SizedBox(
+                        width: double.infinity,
+                        height: 54,
+                        child: ElevatedButton.icon(
+                          onPressed:
+                              _isSubmitting ? null : _submitApplication,
+                          icon: _isSubmitting
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Icon(Icons.send),
+                          label: Text(
+                            _isSubmitting
+                                ? 'Validating Application...'
+                                : 'Submit Job Application',
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      const Text(
+                        'After submission, you will receive an '
+                        'application number that can be used to check '
+                        'your application status.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+
+

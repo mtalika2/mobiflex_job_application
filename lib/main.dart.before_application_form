@@ -1,0 +1,376 @@
+﻿import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+
+import 'firebase_options.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  runApp(const MobiFlexJobApplication());
+}
+
+class MobiFlexJobApplication extends StatelessWidget {
+  const MobiFlexJobApplication({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'MobiFlex African',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.blue,
+        ),
+        useMaterial3: true,
+      ),
+      home: const ApplicantLoginPage(),
+    );
+  }
+}
+
+class ApplicantLoginPage extends StatefulWidget {
+  const ApplicantLoginPage({super.key});
+
+  @override
+  State<ApplicantLoginPage> createState() => _ApplicantLoginPageState();
+}
+
+class _ApplicantLoginPageState extends State<ApplicantLoginPage> {
+  bool _isSigningIn = false;
+
+  Future<void> _signInWithGoogle() async {
+    if (_isSigningIn) {
+      return;
+    }
+
+    setState(() {
+      _isSigningIn = true;
+    });
+
+    try {
+      if (kIsWeb) {
+        // Web: use Firebase's Google popup authentication.
+        final GoogleAuthProvider provider = GoogleAuthProvider();
+
+        await FirebaseAuth.instance.signInWithPopup(provider);
+      } else {
+        // Android: use native Google Sign-In.
+        final GoogleSignInAccount googleUser =
+            await GoogleSignIn.instance.authenticate();
+
+        final GoogleSignInAuthentication googleAuth =
+            googleUser.authentication;
+
+        final AuthCredential credential =
+            GoogleAuthProvider.credential(
+          idToken: googleAuth.idToken,
+        );
+
+        await FirebaseAuth.instance.signInWithCredential(
+          credential,
+        );
+      }
+
+      if (!mounted) {
+        return;
+      }
+
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => const JobApplicationPage(),
+        ),
+      );
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e.message ?? 'Google sign-in failed. Please try again.',
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Google sign-in failed: $e',
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSigningIn = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: 500,
+            ),
+            child: Card(
+              elevation: 4,
+              child: Padding(
+                padding: const EdgeInsets.all(28),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.work_outline,
+                      size: 64,
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'MobiFlex African',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Online Job Application',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Apply for Manager, Agent, or Sales Representative (SR).',
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 28),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: ElevatedButton.icon(
+                        onPressed:
+                            _isSigningIn ? null : _signInWithGoogle,
+                        icon: _isSigningIn
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(Icons.login),
+                        label: Text(
+                          _isSigningIn
+                              ? 'Signing in...'
+                              : 'Continue with Google',
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Your Google account is used to securely identify '
+                      'your job application.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class JobApplicationPage extends StatefulWidget {
+  const JobApplicationPage({super.key});
+
+  @override
+  State<JobApplicationPage> createState() => _JobApplicationPageState();
+}
+
+class _JobApplicationPageState extends State<JobApplicationPage> {
+  String? _selectedPosition;
+  String? _selectedQualification;
+
+  User? get _currentUser => FirebaseAuth.instance.currentUser;
+
+  Future<void> _signOut() async {
+    if (!kIsWeb) {
+      await GoogleSignIn.instance.signOut();
+    }
+
+    await FirebaseAuth.instance.signOut();
+
+    if (!mounted) {
+      return;
+    }
+
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (_) => const ApplicantLoginPage(),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final User? user = _currentUser;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Job Application'),
+        actions: [
+          IconButton(
+            tooltip: 'Sign out',
+            onPressed: _signOut,
+            icon: const Icon(Icons.logout),
+          ),
+        ],
+      ),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: 700,
+            ),
+            child: Card(
+              elevation: 3,
+              child: Padding(
+                padding: const EdgeInsets.all(28),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Applicant Account',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    if (user != null) ...[
+                      Text(
+                        user.displayName ?? 'Applicant',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        user.email ?? '',
+                        style: const TextStyle(
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 28),
+                    DropdownButtonFormField<String>(
+                      initialValue: _selectedPosition,
+                      decoration: const InputDecoration(
+                        labelText: 'Position',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: const [
+                        DropdownMenuItem(
+                          value: 'Manager',
+                          child: Text('Manager'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Agent',
+                          child: Text('Agent'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Sales Representative (SR)',
+                          child: Text(
+                            'Sales Representative (SR)',
+                          ),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedPosition = value;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    DropdownButtonFormField<String>(
+                      initialValue: _selectedQualification,
+                      decoration: const InputDecoration(
+                        labelText: 'Highest Qualification',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: const [
+                        DropdownMenuItem(
+                          value: 'Certificate',
+                          child: Text('Certificate'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Diploma',
+                          child: Text('Diploma'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Degree',
+                          child: Text('Degree'),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedQualification = value;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 28),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Application form will be completed next.',
+                              ),
+                            ),
+                          );
+                        },
+                        child: const Text(
+                          'Continue Application',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
