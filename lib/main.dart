@@ -1,4 +1,4 @@
-﻿import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +24,7 @@ class MobiFlexJobApplication extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'MobiFlex African',
+      title: 'MobiFlex International Global',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -198,7 +198,7 @@ class _ApplicantLoginPageState extends State<ApplicantLoginPage> {
                     const Icon(Icons.work_outline, size: 64),
                     const SizedBox(height: 20),
                     const Text(
-                      'MobiFlex African',
+                      'MobiFlex International Global',
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
@@ -334,7 +334,7 @@ class _JobApplicationPageState extends State<JobApplicationPage> {
     _dateOfBirthController.text = '${selectedDate.year}-$month-$day';
   }
 
-  static const String _backendUrl = 'http://localhost:3000';
+  static const String _backendUrl = 'https://mobiflex-job-backend.onrender.com';
 
   String _contentTypeForFile(PlatformFile file) {
     final String extension = file.extension?.toLowerCase() ?? '';
@@ -1060,7 +1060,7 @@ class _JobApplicationPageState extends State<JobApplicationPage> {
                           child: Text(
                             'I confirm that the information and documents '
                             'provided in this application are correct and '
-                            'genuine. I understand that MobiFlex African '
+                            'genuine. I understand that MobiFlex International Global '
                             'may verify the information and documents for '
                             'recruitment purposes. I consent to the lawful '
                             'collection, review, storage, and processing of '
